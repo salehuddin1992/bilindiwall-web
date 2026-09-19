@@ -1,0 +1,42 @@
+rules_version = '2';
+
+// =============================================================
+// Firestore Security Rules - BilindiWall
+// SMP Negeri Sinombayuga
+//
+// Cara pasang:
+//   Firebase Console > Firestore Database > Rules > tempel > Publish
+//   atau:  firebase deploy --only firestore:rules
+//
+// CATATAN PENTING:
+// Aplikasi BilindiWall (Android maupun Web) TIDAK memakai Firebase
+// Authentication - login diverifikasi di dalam aplikasi terhadap
+// koleksi "users". Karena itu rules di bawah mengizinkan akses
+// tanpa auth, dengan batas waktu agar tidak terbuka selamanya.
+//
+// Ubah tanggal di bawah sebelum kedaluwarsa, atau ganti ke aturan
+// berbasis Firebase Auth bila nanti login dipindah ke Auth.
+// =============================================================
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Koleksi yang dipakai bersama oleh aplikasi Android dan Web
+    match /posts/{docId}         { allow read, write: if request.time < timestamp.date(2027, 12, 31); }
+    match /users/{docId}         { allow read, write: if request.time < timestamp.date(2027, 12, 31); }
+    match /comments/{docId}      { allow read, write: if request.time < timestamp.date(2027, 12, 31); }
+    match /reels/{docId}         { allow read, write: if request.time < timestamp.date(2027, 12, 31); }
+    match /stories/{docId}       { allow read, write: if request.time < timestamp.date(2027, 12, 31); }
+    match /settings/{docId}      { allow read, write: if request.time < timestamp.date(2027, 12, 31); }
+
+    // Koleksi tambahan versi Web (agar data tidak hilang saat refresh).
+    // Aplikasi Android tidak terpengaruh koleksi ini.
+    match /notifications/{docId} { allow read, write: if request.time < timestamp.date(2027, 12, 31); }
+    match /submissions/{docId}   { allow read, write: if request.time < timestamp.date(2027, 12, 31); }
+    match /classes/{docId}       { allow read, write: if request.time < timestamp.date(2027, 12, 31); }
+    match /messages/{docId}      { allow read, write: if request.time < timestamp.date(2027, 12, 31); }
+
+    // Tolak koleksi lain yang tidak dikenal
+    match /{document=**} { allow read, write: if false; }
+  }
+}
